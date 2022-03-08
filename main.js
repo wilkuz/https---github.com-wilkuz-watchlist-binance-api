@@ -1,6 +1,7 @@
 const display = document.querySelector('#displayResponse');
 const formSubmit = document.querySelector('#symbolForm');
-const mainList = document.querySelector('#mainList');
+const mainTable = document.querySelector('#mainListTable');
+const mainTableBody = document.querySelector('#mainListTableBody');
 const symbolInput1 = document.getElementById('inputSymbol1');
 const symbolInput2 = document.getElementById('vs-symbol-select');
 
@@ -59,33 +60,38 @@ async function getDailyData(symbol1, symbol2) {
 async function fetchUserList() {
     let symbols = JSON.parse(localStorage.getItem('watchListSymbols'));
     symbols === null ? symbols = []: null;
+    let btnIDList = [];
 
+    // create new row and populate it with symbols
     for (let i = 0; i < symbols.length; i++) {
         let symbol1 = symbols[i].symbol1;
         let symbol2 = symbols[i].symbol2;
         let price = await getCurrentPrice(symbol1, symbol2);
         let dailyData = await getDailyData(symbol1, symbol2);
-        let dailyChange = dailyData.priceChangePercent;
+        let dailyChange = parseFloat(dailyData.priceChangePercent).toFixed(2);
         let status = symbols[i].status;
+        let deleteBtnID = Date.now();
+        btnIDList.push(deleteBtnID);
 
-        if (status == 'Open') {
-            let newListItem = document.createElement('li');
-            newListItem.innerHTML = `${symbol1}/${symbol2}: ${price} - change today: ${dailyChange}%`;
-            let deleteBtn = document.createElement('button');
-            deleteBtn.textContent = "X";
-            deleteBtn.classList.add("delete-btn");
-            deleteBtn.addEventListener('click', (e) => {
-                symbols.splice(i, 1);
-                let newSymbols = JSON.stringify(symbols);
-                localStorage.setItem('watchListSymbols', newSymbols);
-                symbols = JSON.parse(localStorage.getItem('watchListSymbols'));
-                e.target.parentNode.remove();
-            })
+        let row = `<tr>
+                    <td class="table-data symbol">${symbol1}/${symbol2}</td>
+                    <td class="table-data price">${price}</td>
+                    <td class="table-data dailyPercentChange">${dailyChange}%</td>
+                    <td class="table-data delete-btn" table-data-delete-btn><button class="delete-table-item" id="${deleteBtnID}">X</button></td>
+                  </tr>`
+        mainTableBody.innerHTML += row;
+    }
 
-
-            newListItem.appendChild(deleteBtn);
-            mainList.appendChild(newListItem);
-        }
+    // add event listeners to delete buttons
+    for (let i = 0; i < btnIDList.length; i++) {
+        let deleteBtn = document.getElementById(`${btnIDList[i]}`);
+        deleteBtn.addEventListener('click', (e) => {
+            symbols.splice(i, 1);
+            let newSymbols = JSON.stringify(symbols);
+            localStorage.setItem('watchListSymbols', newSymbols);
+            symbols = JSON.parse(localStorage.getItem('watchListSymbols'));
+            e.target.parentNode.parentNode.remove();
+        });
     }
 };
 

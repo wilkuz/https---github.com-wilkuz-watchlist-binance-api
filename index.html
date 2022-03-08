@@ -19,10 +19,19 @@
             </select>
             <input type="submit" value="Add to list">
         </form>
-        <div class="test-display" id="displayResponse">
-            <ul class="main-list" id="mainList">
-
-            </ul>
+        <div class="main-list-container" id="displayResponse">
+            <table class="main-list-table" id="mainListTable">
+                <thead class="main-list-table-header">
+                    <tr class="main-list-table-header-row">
+                        <th>Symbol</th>
+                        <th>Price</th>
+                        <th>24hr change</th>
+                        <th>Delete symbol</th>
+                    </tr>
+                </thead>
+                <tbody class="main-table-body" id="mainListTableBody">
+                </tbody>
+            </table>
         </div>
     </body>
 </html>
