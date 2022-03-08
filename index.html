@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="style.css">
+        <script src="main.js" defer></script>
+    </head>
+    <body onload="fetchUserList();">
+        <form id="symbolForm">
+            <label for="symbol">Symbol</label>
+            <input type="text" name="symbol1" id="inputSymbol1" placeholder="ex. BTC" value="BTC">
+            <input type="text" name="symbol2" id="inputSymbol2" placeholder="ex. USDT" value="USDT">
+            <input type="submit" value="Add to list">
+        </form>
+        <div class="test-display" id="displayResponse">
+            <ul class="main-list" id="mainList">
+
+            </ul>
+        </div>
+    </body>
+</html>
