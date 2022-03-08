@@ -2,20 +2,25 @@ const display = document.querySelector('#displayResponse');
 const formSubmit = document.querySelector('#symbolForm');
 const mainList = document.querySelector('#mainList');
 const symbolInput1 = document.getElementById('inputSymbol1');
-const symbolInput2 = document.getElementById('inputSymbol2');
+const symbolInput2 = document.getElementById('vs-symbol-select');
 
 
 formSubmit.addEventListener('submit', addSymbolToList);
 
 
 function addSymbolToList() {
-    /* --- SHOULD ADD EXCEPTION FOR BAD INPUTS --- */
-    let input1 = symbolInput1.value.toUpperCase();
-    let input2 = symbolInput2.value.toUpperCase();
-    let symbolPair = {
-        symbol1: input1,
-        symbol2: input2,
-        status: "Open"
+    let input1 = symbolInput1.value;
+    let input2 = symbolInput2.value;
+    let symbolPair = {};
+    if (isOnlyLetters(input1) && isOnlyLetters(input2)) {
+        symbolPair = {
+            symbol1: input1.toUpperCase(),
+            symbol2: input2.toUpperCase(),
+            status: "Open"
+        };
+    } else {
+        alert("Invalid symbol");
+        return
     };
 
 
@@ -33,14 +38,11 @@ function addSymbolToList() {
 }
 
 async function getCurrentPrice(symbol1, symbol2) {
-    /* --- ADD EXCEPTION FOR BAD INPUT --- */
     symbol2 = symbol2.toUpperCase();
     symbol1 = symbol1.toUpperCase();
     let currentPriceURL = `https://api.binance.com/api/v3/avgPrice?symbol=${symbol1}${symbol2}`;
     let response = await fetch(currentPriceURL);
-    console.log(response);
     let data = await response.json();
-    console.log(data);
     let price = parseFloat(data.price).toFixed(2);
     return price;
 }
@@ -86,3 +88,7 @@ async function fetchUserList() {
         }
     }
 };
+
+function isOnlyLetters(str) {
+    return /^[a-zA-Z]+$/.test(str);
+}
