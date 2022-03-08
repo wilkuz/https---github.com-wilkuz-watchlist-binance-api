@@ -33,13 +33,16 @@ function addSymbolToList() {
 }
 
 async function getCurrentPrice(symbol1, symbol2) {
-    /* --- ADD EXCEPTION FOR BAD INPUT ---*/
+    /* --- ADD EXCEPTION FOR BAD INPUT --- */
     symbol2 = symbol2.toUpperCase();
     symbol1 = symbol1.toUpperCase();
     let currentPriceURL = `https://api.binance.com/api/v3/avgPrice?symbol=${symbol1}${symbol2}`;
     let response = await fetch(currentPriceURL);
+    console.log(response);
     let data = await response.json();
-    return parseInt(data.price);
+    console.log(data);
+    let price = parseFloat(data.price).toFixed(2);
+    return price;
 }
 
 async function getDailyData(symbol1, symbol2) {
@@ -48,23 +51,37 @@ async function getDailyData(symbol1, symbol2) {
     let dailyDataURL = `https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol1}${symbol2}`;
     let response = await fetch(dailyDataURL);
     let data = await response.json();
-    console.log(JSON.stringify(data));
+    return data;
 }
 
 async function fetchUserList() {
     let symbols = JSON.parse(localStorage.getItem('watchListSymbols'));
     symbols === null ? symbols = []: null;
-    console.log(symbols);
 
     for (let i = 0; i < symbols.length; i++) {
         let symbol1 = symbols[i].symbol1;
         let symbol2 = symbols[i].symbol2;
         let price = await getCurrentPrice(symbol1, symbol2);
+        let dailyData = await getDailyData(symbol1, symbol2);
+        let dailyChange = dailyData.priceChangePercent;
         let status = symbols[i].status;
 
         if (status == 'Open') {
             let newListItem = document.createElement('li');
-            newListItem.innerHTML = `${symbol1}/${symbol2}: ${price}`;
+            newListItem.innerHTML = `${symbol1}/${symbol2}: ${price} - change today: ${dailyChange}%`;
+            let deleteBtn = document.createElement('button');
+            deleteBtn.textContent = "X";
+            deleteBtn.classList.add("delete-btn");
+            deleteBtn.addEventListener('click', (e) => {
+                symbols.splice(i, 1);
+                let newSymbols = JSON.stringify(symbols);
+                localStorage.setItem('watchListSymbols', newSymbols);
+                symbols = JSON.parse(localStorage.getItem('watchListSymbols'));
+                e.target.parentNode.remove();
+            })
+
+
+            newListItem.appendChild(deleteBtn);
             mainList.appendChild(newListItem);
         }
     }
