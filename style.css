@@ -8,6 +8,8 @@
 
 :root {
     --main-bg-color: rgb(32, 31, 31);
+    --daily-change-red: rgb(255, 47, 47);
+    --daily-change-green: rgb(3, 148, 3);
 }
 
 body {
@@ -31,4 +33,14 @@ body {
 
 .main-table-body tr td {
     padding: .2em 0;
+}
+
+.green {
+    color: var(--daily-change-green);
+    text-shadow: 0 0 2px green;
+}
+
+.red {
+    color: var(--daily-change-red);
+    text-shadow: 0 0 2px red;
 }

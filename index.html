@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <!-- Attribution for APIs used:
+        Coingecko: https://www.coingecko.com/en/api/documentation?
+        Binance: https://binance-docs.github.io/apidocs
+            -->
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <title></title>
@@ -19,6 +23,11 @@
             </select>
             <input type="submit" value="Add to list">
         </form>
+        <div class="list-filter-wrapper">
+            <div class="list-filter-container">
+                <input class="list-filter-input" id="list-search-input" type="text">
+            </div>
+        </div>
         <div class="main-list-container" id="displayResponse">
             <table class="main-list-table" id="mainListTable">
                 <thead class="main-list-table-header">
@@ -26,7 +35,12 @@
                         <th>Symbol</th>
                         <th>Price</th>
                         <th>24hr change</th>
-                        <th>Delete symbol</th>
+                        <th>24hr Volume</th>
+                        <th>1Mo.chg</th>
+                        <th>3Mo.chg</th>
+                        <th>6Mo.chg</th>
+                        <th>12Mo.chg</th>
+                        <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody class="main-table-body" id="mainListTableBody">
