@@ -14,15 +14,15 @@
         <script src="main.js" defer></script>
     </head>
     <body onload="fetchUserList();">
-        <form id="symbolForm">
+        <div id="addSymbolForm">
             <label for="symbol">Symbol</label>
-            <input type="text" name="symbol1" id="inputSymbol1" placeholder="ex. BTC">
+            <input type="text" name="symbol1" id="inputSymbol1" placeholder="ex. BTC" required>
             <select name="vs-symbol" id="vs-symbol-select">
                 <option value="USDT" selected>USDT</option>
                 <option value="BTC">BTC</option>
             </select>
-            <input type="submit" value="Add to list">
-        </form>
+            <button class="submit-new-symbol" id="submitNewSymbol">Add to list</button>
+        </div>
         <div class="list-filter-wrapper">
             <div class="list-filter-container">
                 <input class="list-filter-input" id="list-search-input" type="text">
