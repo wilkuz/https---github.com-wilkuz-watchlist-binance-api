@@ -274,7 +274,7 @@ function calculateMonthlyChanges(data, latestPrice) {
     if (data.length > 30) {
         // data.length-1 gets todays candle
         let oneMonthClose = data[data.length-31][4];
-        let oneMonthChg = (latestPrice - oneMonthClose)/latestPrice;
+        let oneMonthChg = (latestPrice - oneMonthClose)/oneMonthClose;
         monthlyChanges.push(oneMonthChg);
     } else {
         monthlyChanges.push("N/A");
@@ -283,7 +283,7 @@ function calculateMonthlyChanges(data, latestPrice) {
     // if token has existed on binance over 3mo, calculate monthly change
     if (data.length > 90) {
         let threeMonthClose = data[data.length-92][4];
-        let threeMonthChg = (latestPrice - threeMonthClose)/latestPrice;
+        let threeMonthChg = (latestPrice - threeMonthClose)/threeMonthClose;
         monthlyChanges.push(threeMonthChg);
     } else {
         monthlyChanges.push("N/A");
@@ -292,7 +292,7 @@ function calculateMonthlyChanges(data, latestPrice) {
     // if token has existed on binance over 6mo, calculate monthly change
     if (data.length > 180) {
         let sixMonthClose = data[data.length-184][4];
-        let sixMonthChg = (latestPrice - sixMonthClose)/latestPrice;
+        let sixMonthChg = (latestPrice - sixMonthClose)/sixMonthClose;
         monthlyChanges.push(sixMonthChg);
     } else {
         monthlyChanges.push("N/A");
@@ -301,7 +301,7 @@ function calculateMonthlyChanges(data, latestPrice) {
     // if token has existed on binance over 12mo, calculate monthly changes
     if (data.length > 364) {
         let twelveMonthClose = data[0][4];
-        let twelveMonthChg = (latestPrice - twelveMonthClose)/latestPrice;
+        let twelveMonthChg = (latestPrice - twelveMonthClose)/twelveMonthClose;
         monthlyChanges.push(twelveMonthChg);
     } else {
         monthlyChanges.push("N/A");
