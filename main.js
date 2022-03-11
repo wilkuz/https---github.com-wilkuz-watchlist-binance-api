@@ -4,7 +4,22 @@ const mainTable = document.querySelector('#mainListTable');
 const mainTableBody = document.querySelector('#mainListTableBody');
 const symbolInput1 = document.getElementById('inputSymbol1');
 const symbolInput2 = document.getElementById('vs-symbol-select');
-const sortingBtns = document.querySelectorAll('.sorting-btn');
+const reloadBtn = document.getElementById('reloadBtn');
+
+
+/* --- EVENT LISTENER FOR RELOAD BUTTON --- */
+reloadBtn.addEventListener('click', async () => {
+    if (reloadBtn.style.animation == "") {
+        reloadBtn.style.animation = "spin 500ms"
+        await fetchUserList();
+        const animationDelay = delay => new Promise(resolve => setTimeout(() => {
+            reloadBtn.style.animation = "";
+            resolve;
+        }, delay))
+        await animationDelay(500);
+        
+    }
+})
 
 
 /* -- EVENT LISTENER FOR ADDING NEW SYMBOL TO LIST */
@@ -27,7 +42,7 @@ formSubmit.addEventListener('click', async (e) => {
         return
     };
     
-    // make a test request to see if symbol exists or not, if it does exist, ass to local storage, otherwise alert user
+    // make a test request to see if symbol exists or not, if it does exist, add to local storage, otherwise alert user
     let testURL = `https://api.binance.com/api/v3/ticker/24hr?symbol=${symbolPair.symbol1}${symbolPair.symbol2}`;
     let testping = await fetch(testURL).then((response) => {
         if (response.status >= 400 && response.status < 600) {
@@ -35,15 +50,15 @@ formSubmit.addEventListener('click', async (e) => {
             return testResult;
         } else {
             testResult = "passed";
-            let currentSymbols = localStorage.getItem('watchListSymbols');
+            let currentSymbols = localStorage.getItem(display.id);
             if (currentSymbols === null) {
                 let symbols = [];
                 symbols.push(symbolPair);
-                localStorage.setItem('watchListSymbols', JSON.stringify(symbols));
+                localStorage.setItem(display.id, JSON.stringify(symbols));
             } else {
                 let symbols = JSON.parse(currentSymbols);
                 symbols.push(symbolPair);
-                localStorage.setItem('watchListSymbols', JSON.stringify(symbols));
+                localStorage.setItem(display.id, JSON.stringify(symbols));
             }
             location.reload();
             return testResult;
@@ -96,17 +111,17 @@ async function getHistoricalData(symbol1, symbol2) {
 }
 
 
-/* FETCH USERS WATCHLIST FROM LOCAL STORAGE AND ADD THEM TO MAIN LIST ALONG WITH EVENT LISTENERS */
-async function fetchUserList() {
+/* FETCH USERS WATCHLIST FROM LOCAL STORAGE AND ADD ITEMS TO MAIN LIST ALONG WITH EVENT LISTENERS */
+async function fetchUserList(watchlist = "watchListSymbols") {
 
+    display.setAttribute("id", watchlist)
+    let symbols = JSON.parse(localStorage.getItem(watchlist));
     // if user currently has no watchlist, give a default watchlist and save to local storage
-    let symbols = JSON.parse(localStorage.getItem('watchListSymbols'));
     if (symbols === null || symbols.length == 0) {
         symbols = [];
         let defaultSymbols = ["BTC", "ETH", "LUNA", "SOL", "AVAX", "DOT", "DOGE"];
         for (let i = 0; i < defaultSymbols.length; i++) {
             let ID = chance.guid();
-            console.log(defaultSymbols[i]);
             let newSymbol = {
                 symbol1: defaultSymbols[i],
                 symbol2: "USDT",
@@ -115,11 +130,10 @@ async function fetchUserList() {
             symbols.push(newSymbol);
             };
         
-        console.log(symbols);
-        localStorage.setItem('watchListSymbols', JSON.stringify(symbols));
+        localStorage.setItem(watchlist, JSON.stringify(symbols));
     };
 
-    // clear list
+    // clear list table
     mainTableBody.innerHTML = "";
 
     // define values to be used in table
@@ -144,7 +158,7 @@ async function fetchUserList() {
                     <td class="table-data threeMonthPercentChange ${monthlyChanges[1] > 0 ? "green":"red"}">${(monthlyChanges[1] * 100).toFixed(2)}%</td>
                     <td class="table-data sixMonthPercentChange ${monthlyChanges[2] > 0 ? "green":"red"}">${(monthlyChanges[2] * 100).toFixed(2)}%</td>
                     <td class="table-data yearlyPercentChange ${monthlyChanges[3] > 0 ? "green":"red"}">${(monthlyChanges[3] * 100).toFixed(2)}%</td>
-                    <td class="table-data chart-btn" table-data-chart-btn><button class="chart-table-btn chart-closed" id="chart-${ID}"><i class="fa-solid fa-chart-line"></i></button></td>
+                    <td class="table-data chart-btn" table-data-chart-btn><button class="chart-table-btn chart-closed" id="chart-${ID}"><i class="fa-solid fa-chart-line chart-btn"></i></button></td>
                     <td class="table-data delete-btn" table-data-delete-btn><button class="delete-table-item" id="${ID}">X</button></td>
                   </tr>`
         mainTableBody.innerHTML += row;
@@ -169,7 +183,7 @@ async function fetchUserList() {
 
             // add stream to elements
             let priceElem = document.getElementById(`price-${ID}`);
-            if (priceElem == null) {
+            if (priceElem == null || priceElem == "undefined") {
                 // if symbol gets deleted then close the stream
                 priceWS.close();
             } else {
@@ -183,18 +197,36 @@ async function fetchUserList() {
             }
         }
     };
-    // add event listeners to delete and chart buttons - this can't be done in previous for loop because of innerHTML used
+
+    // add event listeners to delete and chart buttons - this can't be done in previous for loop because of innerHTML+= used
     for (let i = 0; i < symbols.length; i++) {
         let ID = symbols[i].ID;
         let deleteBtn = document.getElementById(`${ID}`);
         deleteBtn.addEventListener('click', (e) => {
-            symbols.splice(i, 1);
-            let newSymbols = JSON.stringify(symbols);
-            localStorage.setItem('watchListSymbols', newSymbols);
-            symbols = JSON.parse(localStorage.getItem('watchListSymbols'));
+            if (symbols.length <= 1) {
+                localStorage.removeItem(watchlist);
+                e.target.parentNode.parentNode.remove();
+                mainTableBody.childNodes.forEach((childNode) => {
+                    if (childNode.hasAttribute("id")) {
+                        childNode.getAttribute("id") == `tradingviewChart-row-${ID}` ? childNode.remove() : null;
+                    }
+                })
+                return
+            }
+            let newSymbols = removeItemByID(symbols, ID)
+            localStorage.setItem(watchlist, newSymbols);
+            symbols = JSON.parse(localStorage.getItem(watchlist));
             e.target.parentNode.parentNode.remove();
+
+            // check if chart is currently open, if it is - delete that as well
+            mainTableBody.childNodes.forEach((childNode) => {
+                if (childNode.hasAttribute("id")) {
+                    childNode.getAttribute("id") == `tradingviewChart-row-${ID}` ? childNode.remove() : null;
+                }
+            })
         });
 
+        // configure chart button to open tradingview gadget
         let chartBtn = document.getElementById(`chart-${ID}`);
         chartBtn.addEventListener('click', (e) => {
             if (chartBtn.classList.contains("chart-closed")) {
@@ -225,17 +257,18 @@ async function fetchUserList() {
         })
     }
 
-    // add event listeners for sorting
+    // add event listeners for sorting btns, {once:true} is fine as sortSymbolListByColum() calls fetchUserList(), thus adding event listeners again.
+    let sortingBtns = document.querySelectorAll('.sorting-btn');
     sortingBtns.forEach((button) => {
         button.addEventListener('click', () => {
             if (button.getAttribute('sorting') == "none" || button.getAttribute('sorting') == "ascending") {
-                sortSymbolListByColumn(mainTableBody, parseInt(button.id), false);
                 button.setAttribute('sorting', "descending");
-            } else if (button.getAttribute('sorting' == "descending")) {
-                sortSymbolListByColumn(mainTableBody, parseInt(button.id), true);
+                sortSymbolListByColumn(mainTableBody, parseInt(button.id), false, display.id, sortingBtns);
+            } else if (button.getAttribute('sorting') == "descending") {
                 button.setAttribute('sorting', "ascending");
+                sortSymbolListByColumn(mainTableBody, parseInt(button.id), true, display.id, sortingBtns);
             }
-        })
+        }, {once :   true});
     });
 }
 
@@ -313,7 +346,7 @@ function calculateMonthlyChanges(data, latestPrice) {
 
 
 /* SORTS COLUMNS DEPENGING ON WHAT COLUMN IS CHOSEN FOR SORTING */
-function sortSymbolListByColumn(tableBody, column, asc = true) {
+function sortSymbolListByColumn(tableBody, column, asc = true, watchlist, buttons) {
     const directionModifier = asc ? 1 : -1;
     const rows = Array.from(tableBody.querySelectorAll("tr"));
     let sortedRows = [];
@@ -321,18 +354,15 @@ function sortSymbolListByColumn(tableBody, column, asc = true) {
             sortedRows = rows.sort((a,b) => {
             aColValue = (a.querySelector(`td:nth-child(${column + 1})`).textContent.trim());
             bColValue = (b.querySelector(`td:nth-child(${column + 1})`).textContent.trim());
-    
-            console.log("acol: " + aColValue);
-            console.log("bcol: " + bColValue);
+
             return aColValue > bColValue ? (1 * directionModifier) : (-1 * directionModifier);
         })
     } else if (column == 3) {
+        /* NEED TO ADD FUNCTION FOR REVERSE ABBREVIATION TO CALCULATE VOLUME */
             sortedRows = rows.sort((a,b) => {
             aColValue = parseFloat(a.querySelector(`td:nth-child(${column + 1})`).textContent.trim());
             bColValue = parseFloat(b.querySelector(`td:nth-child(${column + 1})`).textContent.trim());
     
-            console.log("acol: " + aColValue);
-            console.log("bcol: " + bColValue);
             return aColValue > bColValue ? (1 * directionModifier) : (-1 * directionModifier);
         })
     } else {
@@ -340,8 +370,6 @@ function sortSymbolListByColumn(tableBody, column, asc = true) {
             aColValue = parseFloat(a.querySelector(`td:nth-child(${column + 1})`).textContent.trim());
             bColValue = parseFloat(b.querySelector(`td:nth-child(${column + 1})`).textContent.trim());
     
-            console.log("acol: " + aColValue);
-            console.log("bcol: " + bColValue);
             return aColValue > bColValue ? (1 * directionModifier) : (-1 * directionModifier);
         })
     }
@@ -361,8 +389,21 @@ function sortSymbolListByColumn(tableBody, column, asc = true) {
         sortedSymbols.push(symbolPair);
     })
 
-    localStorage.setItem('watchListSymbols', JSON.stringify(sortedSymbols));
+    localStorage.setItem(watchlist, JSON.stringify(sortedSymbols));
 
+    // clear the event listeners from sorting buttons
+    buttons.forEach((button) => {
+        let clone = button.cloneNode(true);
+        button.parentNode.replaceChild(clone, button);
+        console.log("cloned " + button + "to " + clone);
+    })
     // remake list with new sorted array of symbols
     fetchUserList();
+}
+
+function removeItemByID(array, ID) {
+    let filteredArr = array.filter((item)=> {
+        return item.ID != ID
+    })
+    return JSON.stringify(filteredArr);
 }

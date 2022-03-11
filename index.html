@@ -15,14 +15,19 @@
         <script src="https://kit.fontawesome.com/1c8a830042.js" crossorigin="anonymous"></script>
     </head>
     <body onload="fetchUserList();">
-        <div id="addSymbolForm">
-            <label for="symbol">Symbol</label>
-            <input type="text" name="symbol1" id="inputSymbol1" placeholder="ex. BTC" required>
-            <select name="vs-symbol" id="vs-symbol-select">
-                <option value="USDT" selected>USDT</option>
-                <option value="BTC">BTC</option>
-            </select>
-            <button class="submit-new-symbol" id="submitNewSymbol">Add to list</button>
+        <div id="addSymbolForm" class="symbol-form-wrapper">
+            <div class="symbol-form-container">
+                <label for="symbol" class="add-symbol-form-header">Add ticker:</label>
+                <input type ="text" name="symbol1" id="inputSymbol1" placeholder="ex. BTC" required>
+                <select name="vs-symbol" id="vs-symbol-select">
+                    <option value="USDT" selected>USDT</option>
+                    <option value="BTC">BTC</option>
+                </select>
+                <button class="submit-new-symbol" id="submitNewSymbol">Add to list</button>
+            </div>
+            <div class="reload-container" id="reloaBtnContainer">
+                <i class="fa-solid fa-arrow-rotate-right" id="reloadBtn"></i>
+            </div>
         </div>
         <!-- <div class="list-filter-wrapper">
             <div class="list-filter-container">

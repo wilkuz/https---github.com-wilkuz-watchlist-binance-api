@@ -18,7 +18,53 @@ body {
     background-color: var(--main-bg-color);
 }
 
+.symbol-form-wrapper {
+    width: 90%;
+    padding: 1.5em;
+    margin-bottom: 2rem;
+    display: flex;
+    margin: 0 auto;
+    justify-content: space-between;
+    font-size: 1.5em;
+    border-bottom: 2px solid rgb(95, 93, 93);
+}
+
+.symbol-form-container {
+    display: flex;
+    gap: 1em;
+    align-items: center;
+}
+
+.symbol-form-container > input, select, button {
+    font-size: .7em ;
+    border: none;
+    background-color: transparent;
+    padding: .5em;
+    outline: none;
+    color: white;
+}
+
+.symbol-form-container > input {
+    border-bottom: 1px solid white;
+    padding: .2em;
+}
+
+.symbol-form-container > button {
+    background:rgb(95, 93, 93);
+    cursor: pointer;
+}
+
+#reloadBtn {
+    cursor: pointer;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% {transform: rotate(360deg);}
+}
+
 .main-list-container {
+    padding: 2em 0;
     width: 90%;
     margin: 0 auto;
 }
@@ -54,6 +100,7 @@ body {
 
 .delete-table-item {
     padding: 0 .5em;
+    cursor: pointer;
 }
 
 .white {
@@ -63,6 +110,7 @@ body {
 
 .chart-btn {
     width: 100px;
+    cursor: pointer;
 }
 
 .chart-table-btn {
