@@ -149,7 +149,7 @@ async function fetchUserList(watchlist = "watchListSymbols") {
         let ID = symbols[i].ID
 
         //create row and populate with data 
-        let row = `<tr>
+        let row = `<tr id=${ID} data-row>
                     <td class="table-data symbol">${symbol1}/${symbol2}</td>
                     <td class="table-data price" id="price-${ID}">${price}</td>
                     <td class="table-data dailyPercentChange ${dailyChange > 0 ? "green":"red"}" id="dailyChange-${ID}">${dailyChange}%</td>
@@ -159,7 +159,7 @@ async function fetchUserList(watchlist = "watchListSymbols") {
                     <td class="table-data sixMonthPercentChange ${monthlyChanges[2] > 0 ? "green":"red"}">${(monthlyChanges[2] * 100).toFixed(2)}%</td>
                     <td class="table-data yearlyPercentChange ${monthlyChanges[3] > 0 ? "green":"red"}">${(monthlyChanges[3] * 100).toFixed(2)}%</td>
                     <td class="table-data chart-btn" table-data-chart-btn><button class="chart-table-btn chart-closed" id="chart-${ID}"><i class="fa-solid fa-chart-line chart-btn"></i></button></td>
-                    <td class="table-data delete-btn" table-data-delete-btn><button class="delete-table-item" id="${ID}">X</button></td>
+                    <td class="table-data delete-btn" table-data-delete-btn><button class="delete-table-item" id="delete-btn-${ID}">X</button></td>
                   </tr>`
         mainTableBody.innerHTML += row;
     }
@@ -201,7 +201,7 @@ async function fetchUserList(watchlist = "watchListSymbols") {
     // add event listeners to delete and chart buttons - this can't be done in previous for loop because of innerHTML+= used
     for (let i = 0; i < symbols.length; i++) {
         let ID = symbols[i].ID;
-        let deleteBtn = document.getElementById(`${ID}`);
+        let deleteBtn = document.getElementById(`delete-btn-${ID}`);
         deleteBtn.addEventListener('click', (e) => {
             if (symbols.length <= 1) {
                 localStorage.removeItem(watchlist);
@@ -268,7 +268,7 @@ async function fetchUserList(watchlist = "watchListSymbols") {
                 button.setAttribute('sorting', "ascending");
                 sortSymbolListByColumn(mainTableBody, parseInt(button.id), true, display.id, sortingBtns);
             }
-        }, {once :   true});
+        });
     });
 }
 
@@ -348,7 +348,7 @@ function calculateMonthlyChanges(data, latestPrice) {
 /* SORTS COLUMNS DEPENGING ON WHAT COLUMN IS CHOSEN FOR SORTING */
 function sortSymbolListByColumn(tableBody, column, asc = true, watchlist, buttons) {
     const directionModifier = asc ? 1 : -1;
-    const rows = Array.from(tableBody.querySelectorAll("tr"));
+    const rows = Array.from(tableBody.querySelectorAll("[data-row]"));
     let sortedRows = [];
     if (column == 0) {
             sortedRows = rows.sort((a,b) => {
@@ -376,7 +376,8 @@ function sortSymbolListByColumn(tableBody, column, asc = true, watchlist, button
 
     // update local storage
     let sortedSymbols = [];
-    sortedRows.forEach((row, index) => {
+    console.log(sortedRows);
+    sortedRows.forEach((row) => {
         let rowSymbolPair = row.cells[0].innerText;
         let rowSymbolArray = rowSymbolPair.split("/");
         let uniqID = chance.guid();
@@ -390,15 +391,7 @@ function sortSymbolListByColumn(tableBody, column, asc = true, watchlist, button
     })
 
     localStorage.setItem(watchlist, JSON.stringify(sortedSymbols));
-
-    // clear the event listeners from sorting buttons
-    buttons.forEach((button) => {
-        let clone = button.cloneNode(true);
-        button.parentNode.replaceChild(clone, button);
-        console.log("cloned " + button + "to " + clone);
-    })
-    // remake list with new sorted array of symbols
-    fetchUserList();
+    remakeUserList(sortedRows, mainTableBody);
 }
 
 function removeItemByID(array, ID) {
@@ -406,4 +399,11 @@ function removeItemByID(array, ID) {
         return item.ID != ID
     })
     return JSON.stringify(filteredArr);
+}
+
+/* REMAKES A TABLE BY ROWS */
+function remakeUserList(newRows, table) {
+    newRows.forEach(row => {
+        table.appendChild(row);
+    })
 }

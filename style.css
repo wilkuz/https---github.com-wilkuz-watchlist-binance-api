@@ -8,8 +8,9 @@
 
 :root {
     --main-bg-color: rgb(32, 31, 31);
-    --daily-change-red: rgb(255, 47, 47);
-    --daily-change-green: rgb(3, 148, 3);
+    --off-black-color: rgb(20,20,20);
+    --daily-change-red: rgb(255, 53, 53);
+    --daily-change-green: rgb(0, 199, 0);
 }
 
 body {
@@ -80,8 +81,13 @@ body {
     padding-left: .8em
 }
 
+.main-list-table-header-row {
+    line-height: 4em;
+}
+
 .main-table-body > tr {
     text-align: center;
+    line-height: 2em;
 }
 
 .main-table-body tr td {
@@ -95,7 +101,7 @@ body {
 
 .red {
     color: var(--daily-change-red);
-    text-shadow: 0 0 2px red;
+    text-shadow: 0 0 3px rgb(255, 125, 125);
 }
 
 .delete-table-item {
@@ -122,3 +128,8 @@ body {
 .tradingview-chart-container {
     width: 80vw;
 }
+
+tr:nth-child(2n+2) {
+    background-color: var(--off-black-color);
+}
+
