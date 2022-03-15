@@ -1,10 +1,113 @@
-const display = document.querySelector('#displayResponse');
+const display = document.querySelector('[data-main-table]');
 const formSubmit = document.querySelector('#submitNewSymbol');
 const mainTable = document.querySelector('#mainListTable');
 const mainTableBody = document.querySelector('#mainListTableBody');
 const symbolInput1 = document.getElementById('inputSymbol1');
 const symbolInput2 = document.getElementById('vs-symbol-select');
 const reloadBtn = document.getElementById('reloadBtn');
+const selectList = document.getElementById('listSelect');
+const addListBtn = document.getElementById('addListBtn');
+const addListDropdown = document.querySelector('.dropdown-form');
+const addListForm = document.querySelector('.add-new-list-form');
+const newListInput = document.getElementById('list-name-input');
+const newListBtn = document.getElementById('addNewListName');
+const editListsBtn = document.getElementById('editListsBtn');
+const editListDropdown = document.getElementById('editListDropdown');
+
+/* unless user it new to the site (in that case, give user a default watchlist), populate watchlist selectors with users current storage */
+let x = 0;
+while (window.localStorage.key(x) != null) {
+    //populate the current list selector
+    let listNameObj = window.localStorage.key(x);
+    let listNameStr = listNameObj.toString();
+    let newListOption = document.createElement('option');
+    newListOption.setAttribute('value', listNameStr);
+    newListOption.innerHTML = listNameStr;
+    selectList.appendChild(newListOption);
+
+    //populate the edit list
+    let newListEditItem = document.createElement('li');
+    newListEditItem.classList.add('dropdown-edit-list-item');
+    newListEditItem.innerText = listNameStr;
+    editListDropdown.appendChild(newListEditItem);
+
+    // buttons and button container
+    let editItemBtnContainer = document.createElement('div');
+    let removeListBtn = document.createElement('button');
+    removeListBtn.innerHTML = `<i class="fa-solid fa-xmark fa-xs"></i>`
+
+    editItemBtnContainer.append(removeListBtn);
+    newListEditItem.appendChild(editItemBtnContainer);
+
+    removeListBtn.addEventListener('click', () => {
+        localStorage.removeItem(listNameStr);
+        newListEditItem.remove();
+        newListOption.remove();
+    })
+    x++;
+}
+
+
+
+
+// close dropdown if clicked outside of box
+document.addEventListener('click', e => {
+    let addBtnAndDropdown = [addListDropdown, addListBtn, addListForm, newListInput];
+    if (addListDropdown.classList.contains('active') && addBtnAndDropdown.indexOf(e.target) < 0) {
+        addListDropdown.classList.remove('active');
+        addListBtn.classList.remove('active');
+    }
+
+    let editListItems = document.querySelectorAll('.dropdown-edit-list-item');
+    let editBbtnAndDropdown = [editListDropdown, ...editListItems, editListsBtn];
+    if (editListDropdown.classList.contains('active') && editBbtnAndDropdown.indexOf(e.target) < 0) {
+        editListsBtn.classList.remove('active');
+        editListDropdown.classList.remove('active');
+    }
+    
+});
+
+// change current displayed list to selected list
+selectList.addEventListener('change', e => {
+    console.log(selectList.value)
+    fetchUserList(selectList.value);
+})
+
+
+//toggle dropdown to edit lists
+editListsBtn.addEventListener('click', () => {
+    if (editListsBtn.classList.contains('active')) {
+        editListsBtn.classList.remove('active');
+        editListDropdown.classList.remove('active');
+    } else {
+        editListsBtn.classList.add('active');
+        editListDropdown.classList.add('active');
+    }
+})
+
+// toggle dropdown to add new list
+addListBtn.addEventListener('click', () => {
+    if (addListDropdown.classList.contains('active')) {
+        addListBtn.classList.remove('active');
+        addListDropdown.classList.remove('active');
+    } else {
+        addListBtn.classList.add('active');
+        addListDropdown.classList.add('active');
+    }
+
+});
+
+// form button to add a new list with user input as name
+newListBtn.addEventListener('click', () => {
+    let newListName = newListInput.value;
+    localStorage.setItem(newListName, []);
+    let newListOption = document.createElement('option');
+    newListOption.setAttribute('value', newListName);
+    newListOption.innerHTML = newListName;
+    selectList.appendChild(newListOption);
+    selectList.value = newListName;
+    fetchUserList();
+})
 
 
 /* --- EVENT LISTENER FOR RELOAD BUTTON --- */
@@ -51,11 +154,19 @@ formSubmit.addEventListener('click', async (e) => {
         } else {
             testResult = "passed";
             let currentSymbols = localStorage.getItem(display.id);
-            if (currentSymbols === null) {
+            console.log("current symbols is: " + currentSymbols);
+            console.log(display.id)
+            console.log(typeof currentSymbols);
+            if (currentSymbols == null) {
                 let symbols = [];
                 symbols.push(symbolPair);
                 localStorage.setItem(display.id, JSON.stringify(symbols));
-            } else {
+            } else if (currentSymbols == '') {
+                let symbols = [];
+                symbols.push(symbolPair);
+                localStorage.setItem(display.id, JSON.stringify(symbols));
+            } 
+            else {
                 let symbols = JSON.parse(currentSymbols);
                 symbols.push(symbolPair);
                 localStorage.setItem(display.id, JSON.stringify(symbols));
@@ -112,12 +223,14 @@ async function getHistoricalData(symbol1, symbol2) {
 
 
 /* FETCH USERS WATCHLIST FROM LOCAL STORAGE AND ADD ITEMS TO MAIN LIST ALONG WITH EVENT LISTENERS */
-async function fetchUserList(watchlist = "watchListSymbols") {
+async function fetchUserList(watchlist = selectList.value) {
 
-    display.setAttribute("id", watchlist)
-    let symbols = JSON.parse(localStorage.getItem(watchlist));
-    // if user currently has no watchlist, give a default watchlist and save to local storage
-    if (symbols === null || symbols.length == 0) {
+    console.log(watchlist);
+    let symbols = localStorage.getItem(watchlist);
+    console.log(symbols);
+    console.log(typeof symbols)
+    // if user is new to the website, or has no watchlists, give a default watchlist
+    if (window.localStorage.key(0) == null) {
         symbols = [];
         let defaultSymbols = ["BTC", "ETH", "LUNA", "SOL", "AVAX", "DOT", "DOGE"];
         for (let i = 0; i < defaultSymbols.length; i++) {
@@ -130,9 +243,24 @@ async function fetchUserList(watchlist = "watchListSymbols") {
             symbols.push(newSymbol);
             };
         
-        localStorage.setItem(watchlist, JSON.stringify(symbols));
-    };
+        localStorage.setItem("My watchlist", JSON.stringify(symbols));
+        display.setAttribute("id", "My watchlist");
+        mainTableBody.classList.remove('empty-list');
+        watchlist = display.id;
+    } else if (symbols == '') {
+        mainTableBody.innerHTML = "List is empty, add a ticker above!";
+        display.setAttribute('id', watchlist);
+        mainTableBody.classList.add('empty-list');
+        return
+    } else {
+        symbols = JSON.parse(symbols);
+        display.setAttribute("id", watchlist);
+        mainTableBody.classList.remove('empty-list');
+    }
 
+    console.log("when i run rest of code, symbols is: " + JSON.stringify(symbols));
+    console.log("it is");
+    console.log(symbols.length + " long");
     // clear list table
     mainTableBody.innerHTML = "";
 
@@ -161,7 +289,10 @@ async function fetchUserList(watchlist = "watchListSymbols") {
                     <td class="table-data chart-btn" table-data-chart-btn><button class="chart-table-btn chart-closed" id="chart-${ID}"><i class="fa-solid fa-chart-line chart-btn"></i></button></td>
                     <td class="table-data delete-btn" table-data-delete-btn><button class="delete-table-item" id="delete-btn-${ID}">X</button></td>
                   </tr>`
-        mainTableBody.innerHTML += row;
+        if (display.id == watchlist) {
+            mainTableBody.innerHTML += row;
+        }
+        
     }
 
     // add websocket to price columns & daily change to display live data for each symbol in list

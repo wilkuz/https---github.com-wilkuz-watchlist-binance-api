@@ -11,6 +11,7 @@
     --off-black-color: rgb(20,20,20);
     --daily-change-red: rgb(255, 53, 53);
     --daily-change-green: rgb(0, 199, 0);
+    --gray-btn: rgb(95, 93, 93);
 }
 
 body {
@@ -27,7 +28,7 @@ body {
     margin: 0 auto;
     justify-content: space-between;
     font-size: 1.5em;
-    border-bottom: 2px solid rgb(95, 93, 93);
+    border-bottom: 2px solid var(--gray-btn);
 }
 
 .symbol-form-container {
@@ -51,12 +52,132 @@ body {
 }
 
 .symbol-form-container > button {
-    background:rgb(95, 93, 93);
+    background:var(--gray-btn);
     cursor: pointer;
+}
+
+.submit-new-symbol:hover {
+    opacity: .9;
 }
 
 #reloadBtn {
     cursor: pointer;
+    font-size: .8em;
+}
+
+.reload-and-select-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    position: relative;
+}
+
+.dropdown-edit-list {
+    min-width: 50%;
+    background: var(--gray-btn);
+    padding: 1em .5em;
+    position: absolute;
+    list-style: none;
+    opacity: 0;
+    pointer-events: none;
+    top: 2.5em;
+    left: 25%;
+    font-size: .8em;
+    transition: opacity 250ms ease;
+}
+
+.dropdown-edit-list.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.edit-lists-btn {
+    background: var(--gray-btn);
+    padding: .2em .7em;
+    font-size: .7em;
+    cursor: pointer;
+}
+
+.edit-lists-btn:hover {
+    opacity: .9;
+}
+
+.edit-lists-btn.active {
+    background: var(--gray-btn);
+    opacity: 0.7;
+}
+
+.dropdown-edit-list-item {
+    display: flex;
+    justify-content: space-between;
+}
+
+.dropdown-edit-list-item button {
+    cursor: pointer;
+}
+
+.add-new-list-btn {
+    background: var(--gray-btn);
+    padding: .2em .7em;
+    font-size: .7em;
+    cursor: pointer;
+}
+
+.add-new-list-btn:hover {
+    opacity: .9;
+}
+
+.add-new-list-btn.active {
+    background: var(--gray-btn);
+    opacity: 0.7;
+}
+
+.dropdown-form.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.dropdown-form {
+    position: absolute;
+    left: 58%;
+    top: calc(100% + .5em);
+    background: var(--gray-btn);
+    padding: 1.5em .5em .5em .5em;
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 250ms ease;
+}
+
+.dropdown-form input {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid black;
+    outline: none;
+    line-height: 1em;
+    color: white;
+    font-size: .6em;
+}
+
+.dropdown-form input::placeholder {
+    color: rgba(255,255,255, 0.35);
+}
+
+.add-new-list-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    justify-content: center;
+    align-items: center;
+}
+
+.add-list-item-btn {
+    width: 50%;
+    background: var(--gray-btn);
+    border: 2px solid rgb(165, 165, 165);
+    font-size: .6em;
+    padding: .2em;
+    box-shadow: 0px 0px 3px rgb(179, 255, 205);
 }
 
 @keyframes spin {
@@ -68,6 +189,13 @@ body {
     padding: 2em 0;
     width: 90%;
     margin: 0 auto;
+}
+
+.empty-list {
+    top: 2em;
+    text-align: center;
+    position: relative;
+    left: calc(50% - 34ch)
 }
 
 .main-list-table {
@@ -131,5 +259,11 @@ body {
 
 tr:nth-child(2n+2) {
     background-color: var(--off-black-color);
+}
+
+.reload-container {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
 }
 
